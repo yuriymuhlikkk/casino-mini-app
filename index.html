@@ -9,7 +9,7 @@
         body {
             background: url('https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b') no-repeat center center fixed;
             background-size: cover;
-            background-color: rgba(0, 0, 50, 0.7); /* Затемнений синій */
+            background-color: rgba(0, 0, 50, 0.7);
             color: white;
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -17,17 +17,8 @@
             text-align: center;
             transition: background-color 0.5s;
         }
-        .light-theme {
-            background-color: rgba(255, 255, 255, 0.9);
-            color: black;
-        }
-        .menu {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            max-width: 500px;
-            margin: 20px auto;
-        }
+        .light-theme { background-color: rgba(255, 255, 255, 0.9); color: black; }
+        .menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 500px; margin: 20px auto; }
         button {
             padding: 15px;
             background: linear-gradient(45deg, #ff4500, #ff8c00);
@@ -39,77 +30,44 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-        }
-        #balance {
-            font-size: 24px;
-            margin: 10px 0;
-        }
-        #game-area {
-            display: none;
-            margin-top: 20px;
-        }
+        button:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); }
+        #balance { font-size: 24px; margin: 10px 0; }
     </style>
 </head>
 <body>
     <h1>🎰 Casino Power</h1>
     <div id="balance">Баланс: 100</div>
     <div class="menu">
-        <button onclick="startGame('slots')">🎰 Слоты</button>
+        <button onclick="Telegram.WebApp.openLink('https://yuriymuhlikkk.github.io/casino-mini-app/slots.html')">🎰 Слоты</button>
         <button onclick="startGame('roulette')">🎡 Рулетка</button>
         <button onclick="startGame('blackjack')">🃏 Блекджек</button>
         <button onclick="startGame('dice')">🎲 Кости</button>
         <button onclick="deposit()">💸 Пополнить</button>
         <button onclick="toggleTheme()">🌙 Тема</button>
     </div>
-    <div id="game-area"></div>
 
     <script>
         let balance = 100;
         let lang = "ru";
         let theme = "dark";
 
-        // Ініціалізація Telegram Web App
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
 
-        // Оновлення балансу
         function updateBalance() {
-            document.getElementById("balance").innerText = lang === "ru" ? `Баланс: ${balance}` : `Balance: ${balance}`;
+            document.getElementById("balance").textContent = lang === "ru" ? `Баланс: ${balance}` : `Balance: ${balance}`;
         }
 
-        // Перемикач теми
         function toggleTheme() {
             theme = theme === "dark" ? "light" : "dark";
             document.body.classList.toggle("light-theme", theme === "light");
         }
 
-        // Старт гри
-        function startGame(game) {
-            const gameArea = document.getElementById("game-area");
-            gameArea.style.display = "block";
-            if (game === "slots") {
-                gameArea.innerHTML = "<p>Крутим слоты... " + (Math.random() > 0.5 ? "Выигрыш +50!" : "Проигрыш -20") + "</p>";
-                balance += Math.random() > 0.5 ? 50 : -20;
-            } else if (game === "roulette") {
-                gameArea.innerHTML = "<p>Крутим рулетку... " + (Math.random() > 0.5 ? "Красное +30!" : "Черное -10") + "</p>";
-                balance += Math.random() > 0.5 ? 30 : -10;
-            } else if (game === "blackjack") {
-                gameArea.innerHTML = "<p>Блекджек: " + (Math.random() > 0.7 ? "21! +100" : "Перебор -30") + "</p>";
-                balance += Math.random() > 0.7 ? 100 : -30;
-            } else if (game === "dice") {
-                gameArea.innerHTML = "<p>Бросаем кости: " + (Math.floor(Math.random() * 6) + 1) + (Math.random() > 0.5 ? " +20" : " -10") + "</p>";
-                balance += Math.random() > 0.5 ? 20 : -10;
-            }
-            updateBalance();
-        }
-
-        // Поповнення (поки заглушка для крипти)
         function deposit() {
             alert(lang === "ru" ? "Пополнение через крипту скоро будет!" : "Crypto deposit coming soon!");
         }
+
+        updateBalance();
     </script>
 </body>
 </html>
