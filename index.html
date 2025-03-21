@@ -152,16 +152,16 @@
         let theme = "dark";
         const baseUrl = "https://yuriymuhlikkk.github.io/casino-mini-app/";
 
-        // Чекаємо завантаження Telegram Web App
-        window.addEventListener('load', () => {
-            if (typeof Telegram !== "undefined" && Telegram.WebApp) {
-                Telegram.WebApp.ready();
-                Telegram.WebApp.expand();
-                console.log("Telegram Web App initialized successfully");
-            } else {
-                console.log("Running outside Telegram, using fallback navigation");
-            }
-        });
+        // Ініціалізація з дебагом
+        console.log("Script started");
+        if (window.Telegram && window.Telegram.WebApp) {
+            console.log("Telegram WebApp detected");
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            console.log("Telegram WebApp initialized and expanded");
+        } else {
+            console.log("Not in Telegram environment");
+        }
 
         function updateBalance() {
             document.getElementById("balance").textContent = lang === "ru" ? `Баланс: ${balance}` : `Balance: ${balance}`;
@@ -180,27 +180,24 @@
 
         function openGame(game) {
             const url = baseUrl + game;
-            console.log("Attempting to open: " + url);
-            try {
-                if (typeof Telegram !== "undefined" && Telegram.WebApp && Telegram.WebApp.isExpanded) {
-                    Telegram.WebApp.openLink(url);
-                    console.log("Opened via Telegram.WebApp.openLink");
-                } else {
-                    window.location.href = url; // Резерв для браузера
-                    console.log("Opened via window.location.href (fallback)");
-                }
-            } catch (error) {
-                console.error("Error opening game: ", error);
-                alert("Ошибка при открытии игры! Проверь консоль.");
+            console.log("Button clicked, attempting to open: " + url);
+            if (window.Telegram && window.Telegram.WebApp) {
+                console.log("Using Telegram.WebApp.openLink");
+                window.Telegram.WebApp.openLink(url);
+            } else {
+                console.log("Using window.location.href (fallback)");
+                window.location.href = url;
             }
         }
 
         function toggleDeposit() {
+            console.log("Deposit button clicked");
             const options = document.getElementById("depositOptions");
             options.style.display = options.style.display === "block" ? "none" : "block";
         }
 
         function deposit(method) {
+            console.log("Deposit method selected: " + method);
             alert(lang === "ru" ? `Пополнение через ${method} скоро будет!` : `Deposit via ${method} coming soon!`);
             document.getElementById("depositOptions").style.display = "none";
         }
