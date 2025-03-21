@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 Слоты</title>
+    <title>🃏 Блекджек</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -23,7 +23,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('https://i.imgur.com/5z5xK8P.png') repeat;
+            background: url('https://i.imgur.com/8k8xK8P.png') repeat;
             opacity: 0.1;
             animation: drift 20s linear infinite;
         }
@@ -31,35 +31,25 @@
             0% { background-position: 0 0; }
             100% { background-position: 200px 200px; }
         }
-        .slot-machine {
+        .cards {
             display: flex;
             justify-content: center;
             gap: 15px;
             margin: 20px 0;
         }
-        .reel {
-            width: 120px;
-            height: 180px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        .card {
+            width: 100px;
+            height: 150px;
+            background: linear-gradient(135deg, #fff, #ddd);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            font-size: 30px;
+            line-height: 150px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.5s ease-out;
         }
-        .reel-inner {
-            position: absolute;
-            top: -100%;
-            width: 100%;
-            height: 200%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 50px;
-            transition: transform 3s ease-out;
-        }
-        .reel.spinning .reel-inner {
-            transform: translateY(50%);
-        }
+        .card.dealt { transform: translateY(0) rotate(0deg); }
+        .card { transform: translateY(-300px) rotate(-45deg); }
         button {
             padding: 15px 30px;
             background: linear-gradient(135deg, #ff4500, #ff8c00);
@@ -76,20 +66,16 @@
     </style>
 </head>
 <body class="bg-elements">
-    <h1>🎰 Слоты</h1>
+    <h1>🃏 Блекджек</h1>
     <div id="balance">Баланс: 100</div>
-    <div class="slot-machine">
-        <div class="reel"><div class="reel-inner">🍒🍋💎7️⃣⭐🍊</div></div>
-        <div class="reel"><div class="reel-inner">🍒🍋💎7️⃣⭐🍊</div></div>
-        <div class="reel"><div class="reel-inner">🍒🍋💎7️⃣⭐🍊</div></div>
-    </div>
+    <div class="cards" id="player-cards"></div>
     <input type="number" id="bet" value="10" min="1" max="100" style="padding: 10px; margin: 10px; border-radius: 5px;">
-    <button onclick="spinSlots()">Крутить</button>
+    <button onclick="dealCards()">Раздать</button>
     <button onclick="Telegram.WebApp.close()">Назад</button>
 
     <script>
         let balance = 100;
-        const symbols = ['🍒', '🍋', '💎', '7️⃣', '⭐', '🍊'];
+        const cards = ['2♠', '3♠', '4♠', '5♠', '6♠', '7♠', '8♠', '9♠', '10♠', 'J♠', 'Q♠', 'K♠', 'A♠'];
 
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
@@ -98,39 +84,41 @@
             document.getElementById("balance").textContent = `Баланс: ${balance}`;
         }
 
-        function spinSlots() {
+        function dealCards() {
             const bet = parseInt(document.getElementById("bet").value);
             if (bet > balance) {
                 alert("Недостаточно средств!");
                 return;
             }
 
-            const reels = document.querySelectorAll(".reel");
-            reels.forEach(reel => reel.classList.add("spinning"));
+            const playerCards = document.getElementById("player-cards");
+            playerCards.innerHTML = "";
+            const hand = [
+                cards[Math.floor(Math.random() * cards.length)],
+                cards[Math.floor(Math.random() * cards.length)]
+            ];
+            hand.forEach((card, i) => {
+                const cardEl = document.createElement("div");
+                cardEl.classList.add("card");
+                cardEl.textContent = card;
+                playerCards.appendChild(cardEl);
+                setTimeout(() => cardEl.classList.add("dealt"), i * 300);
+            });
 
             setTimeout(() => {
-                reels.forEach(reel => reel.classList.remove("spinning"));
-                const result = [
-                    symbols[Math.floor(Math.random() * symbols.length)],
-                    symbols[Math.floor(Math.random() * symbols.length)],
-                    symbols[Math.floor(Math.random() * symbols.length)]
-                ];
-                reels.forEach((reel, i) => reel.querySelector(".reel-inner").textContent = result[i]);
-
-                if (result[0] === result[1] && result[1] === result[2]) {
-                    const win = bet * 10;
-                    balance += win;
-                    alert(`Джекпот! Вы выиграли ${win}!`);
-                } else if (result[0] === result[1] || result[1] === result[2]) {
-                    const win = bet * 2;
-                    balance += win;
-                    alert(`Вы выиграли ${win}!`);
+                const score = hand.reduce((sum, c) => sum + (c.includes('A') ? 11 : c.includes('K') || c.includes('Q') || c.includes('J') ? 10 : parseInt(c)), 0);
+                if (score === 21) {
+                    balance += bet * 2;
+                    alert(`Блекджек! Вы выиграли ${bet * 2}!`);
+                } else if (score > 21) {
+                    balance -= bet;
+                    alert(`Перебор! Проигрыш!`);
                 } else {
                     balance -= bet;
-                    alert("Проигрыш!");
+                    alert(`Счет: ${score}. Проигрыш!`);
                 }
                 updateBalance();
-            }, 3000);
+            }, 1000);
         }
     </script>
 </body>

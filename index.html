@@ -3,68 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💰 Casino Power</title>
+    <title>💰 Casino Elite</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background: url('https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b') no-repeat center center fixed;
-            background-size: cover;
-            background-color: rgba(0, 0, 50, 0.7);
-            color: white;
+            background: #0d1b2a;
+            color: #e0e1dd;
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 20px;
             text-align: center;
-            transition: background-color 0.5s;
+            position: relative;
+            overflow: hidden;
         }
-        .light-theme { background-color: rgba(255, 255, 255, 0.9); color: black; }
-        .menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 500px; margin: 20px auto; }
+        .bg-elements::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://i.imgur.com/5z5xK8P.png') repeat, /* фішки */
+                        url('https://i.imgur.com/8k8xK8P.png') repeat; /* карти */
+            opacity: 0.1;
+            animation: drift 20s linear infinite;
+        }
+        @keyframes drift {
+            0% { background-position: 0 0, 100px 100px; }
+            100% { background-position: 200px 200px, 300px 300px; }
+        }
+        h1 { font-size: 36px; text-shadow: 0 0 10px #ff4500; }
+        #balance { font-size: 24px; margin: 10px 0; }
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 600px;
+            margin: 40px auto;
+        }
         button {
             padding: 15px;
-            background: linear-gradient(45deg, #ff4500, #ff8c00);
+            background: linear-gradient(135deg, #ff4500, #ff8c00);
             border: none;
-            border-radius: 12px;
+            border-radius: 15px;
             color: white;
             font-size: 18px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 20px rgba(255, 69, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        button:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); }
-        #balance { font-size: 24px; margin: 10px 0; }
+        button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 69, 0, 0.8);
+        }
     </style>
 </head>
-<body>
-    <h1>🎰 Casino Power</h1>
+<body class="bg-elements">
+    <h1>💰 Casino Elite</h1>
     <div id="balance">Баланс: 100</div>
     <div class="menu">
         <button onclick="Telegram.WebApp.openLink('https://yuriymuhlikkk.github.io/casino-mini-app/slots.html')">🎰 Слоты</button>
-        <button onclick="startGame('roulette')">🎡 Рулетка</button>
-        <button onclick="startGame('blackjack')">🃏 Блекджек</button>
-        <button onclick="startGame('dice')">🎲 Кости</button>
+        <button onclick="Telegram.WebApp.openLink('https://yuriymuhlikkk.github.io/casino-mini-app/roulette.html')">🎡 Рулетка</button>
+        <button onclick="Telegram.WebApp.openLink('https://yuriymuhlikkk.github.io/casino-mini-app/blackjack.html')">🃏 Блекджек</button>
+        <button onclick="Telegram.WebApp.openLink('https://yuriymuhlikkk.github.io/casino-mini-app/dice.html')">🎲 Кости</button>
         <button onclick="deposit()">💸 Пополнить</button>
         <button onclick="toggleTheme()">🌙 Тема</button>
     </div>
 
     <script>
         let balance = 100;
-        let lang = "ru";
         let theme = "dark";
 
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
 
         function updateBalance() {
-            document.getElementById("balance").textContent = lang === "ru" ? `Баланс: ${balance}` : `Balance: ${balance}`;
+            document.getElementById("balance").textContent = `Баланс: ${balance}`;
         }
 
         function toggleTheme() {
             theme = theme === "dark" ? "light" : "dark";
-            document.body.classList.toggle("light-theme", theme === "light");
+            document.body.style.background = theme === "dark" ? "#0d1b2a" : "#e0e1dd";
+            document.body.style.color = theme === "dark" ? "#e0e1dd" : "#0d1b2a";
         }
 
         function deposit() {
-            alert(lang === "ru" ? "Пополнение через крипту скоро будет!" : "Crypto deposit coming soon!");
+            alert("Пополнение через крипту скоро будет!");
         }
 
         updateBalance();

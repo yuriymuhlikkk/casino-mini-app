@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 Слоты</title>
+    <title>🎲 Кости</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -31,34 +31,31 @@
             0% { background-position: 0 0; }
             100% { background-position: 200px 200px; }
         }
-        .slot-machine {
+        .dice-area {
+            perspective: 1000px;
+            margin: 20px 0;
+            height: 200px;
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 30px;
         }
-        .reel {
-            width: 120px;
-            height: 180px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        .die {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 10px;
+            font-size: 40px;
+            line-height: 80px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 1.5s ease-out;
         }
-        .reel-inner {
-            position: absolute;
-            top: -100%;
-            width: 100%;
-            height: 200%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 50px;
-            transition: transform 3s ease-out;
+        .die.rolling {
+            animation: rollDice 1.5s ease-out forwards;
         }
-        .reel.spinning .reel-inner {
-            transform: translateY(50%);
+        @keyframes rollDice {
+            0% { transform: translateZ(-200px) rotateX(0deg) rotateY(0deg); }
+            50% { transform: translateZ(100px) rotateX(360deg) rotateY(360deg); }
+            100% { transform: translateZ(0) rotateX(720deg) rotateY(720deg); }
         }
         button {
             padding: 15px 30px;
@@ -76,20 +73,18 @@
     </style>
 </head>
 <body class="bg-elements">
-    <h1>🎰 Слоты</h1>
+    <h1>🎲 Кости</h1>
     <div id="balance">Баланс: 100</div>
-    <div class="slot-machine">
-        <div class="reel"><div class="reel-inner">🍒🍋💎7️⃣⭐🍊</div></div>
-        <div class="reel"><div class="reel-inner">🍒🍋💎7️⃣⭐🍊</div></div>
-        <div class="reel"><div class="reel-inner">🍒🍋💎7️⃣⭐🍊</div></div>
+    <div class="dice-area">
+        <div class="die" id="die1">1</div>
+        <div class="die" id="die2">2</div>
     </div>
     <input type="number" id="bet" value="10" min="1" max="100" style="padding: 10px; margin: 10px; border-radius: 5px;">
-    <button onclick="spinSlots()">Крутить</button>
+    <button onclick="rollDice()">Бросить</button>
     <button onclick="Telegram.WebApp.close()">Назад</button>
 
     <script>
         let balance = 100;
-        const symbols = ['🍒', '🍋', '💎', '7️⃣', '⭐', '🍊'];
 
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
@@ -98,39 +93,35 @@
             document.getElementById("balance").textContent = `Баланс: ${balance}`;
         }
 
-        function spinSlots() {
+        function rollDice() {
             const bet = parseInt(document.getElementById("bet").value);
             if (bet > balance) {
                 alert("Недостаточно средств!");
                 return;
             }
 
-            const reels = document.querySelectorAll(".reel");
-            reels.forEach(reel => reel.classList.add("spinning"));
+            const dice = [document.getElementById("die1"), document.getElementById("die2")];
+            dice.forEach(die => die.classList.add("rolling"));
 
             setTimeout(() => {
-                reels.forEach(reel => reel.classList.remove("spinning"));
+                dice.forEach(die => die.classList.remove("rolling"));
                 const result = [
-                    symbols[Math.floor(Math.random() * symbols.length)],
-                    symbols[Math.floor(Math.random() * symbols.length)],
-                    symbols[Math.floor(Math.random() * symbols.length)]
+                    Math.floor(Math.random() * 6) + 1,
+                    Math.floor(Math.random() * 6) + 1
                 ];
-                reels.forEach((reel, i) => reel.querySelector(".reel-inner").textContent = result[i]);
+                dice[0].textContent = result[0];
+                dice[1].textContent = result[1];
 
-                if (result[0] === result[1] && result[1] === result[2]) {
-                    const win = bet * 10;
-                    balance += win;
-                    alert(`Джекпот! Вы выиграли ${win}!`);
-                } else if (result[0] === result[1] || result[1] === result[2]) {
-                    const win = bet * 2;
-                    balance += win;
-                    alert(`Вы выиграли ${win}!`);
+                const total = result[0] + result[1];
+                if (total === 7 || total === 11) {
+                    balance += bet;
+                    alert(`Выпало ${total}! Вы выиграли ${bet}!`);
                 } else {
                     balance -= bet;
-                    alert("Проигрыш!");
+                    alert(`Выпало ${total}! Проигрыш!`);
                 }
                 updateBalance();
-            }, 3000);
+            }, 1500);
         }
     </script>
 </body>
