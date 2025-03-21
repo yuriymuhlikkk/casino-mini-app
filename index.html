@@ -23,17 +23,57 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('https://i.imgur.com/5z5xK8P.png') repeat, /* фішки */
-                        url('https://i.imgur.com/8k8xK8P.png') repeat; /* карти */
-            opacity: 0.1;
-            animation: drift 20s linear infinite;
+            background: radial-gradient(circle, rgba(255, 69, 0, 0.1), transparent);
+            animation: pulse 10s infinite;
         }
-        @keyframes drift {
-            0% { background-position: 0 0, 100px 100px; }
-            100% { background-position: 200px 200px, 300px 300px; }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.2; }
+            100% { transform: scale(1); opacity: 0.5; }
         }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .balance-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .balance-box button {
+            background: #ff4500;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .balance-box button:hover { transform: scale(1.1); }
+        .options {
+            display: flex;
+            gap: 10px;
+        }
+        .options button {
+            background: linear-gradient(135deg, #ff4500, #ff8c00);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .options button:hover { transform: translateY(-3px); }
         h1 { font-size: 36px; text-shadow: 0 0 10px #ff4500; }
-        #balance { font-size: 24px; margin: 10px 0; }
         .menu {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -41,7 +81,7 @@
             max-width: 600px;
             margin: 40px auto;
         }
-        button {
+        .menu button {
             padding: 15px;
             background: linear-gradient(135deg, #ff4500, #ff8c00);
             border: none;
@@ -52,33 +92,70 @@
             box-shadow: 0 5px 20px rgba(255, 69, 0, 0.5);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        button:hover {
+        .menu button:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(255, 69, 0, 0.8);
         }
+        .deposit-options {
+            display: none;
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .deposit-options button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            background: linear-gradient(135deg, #ff4500, #ff8c00);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .deposit-options button:hover { transform: translateY(-3px); }
     </style>
 </head>
 <body class="bg-elements">
+    <div class="header">
+        <div class="balance-box">
+            <span id="balance">Баланс: 100</span>
+            <button onclick="toggleDeposit()">+</button>
+        </div>
+        <div class="options">
+            <button onclick="changeLang()">RU/EN</button>
+            <button onclick="toggleTheme()">🌙</button>
+        </div>
+    </div>
     <h1>💰 Casino Elite</h1>
-    <div id="balance">Баланс: 100</div>
     <div class="menu">
-        <button onclick="Telegram.WebApp.openLink('https://yuriymuhlikkk.github.io/casino-mini-app/slots.html')">🎰 Слоты</button>
-        <button onclick="Telegram.WebApp.openLink('https://yuriymuhlikkk.github.io/casino-mini-app/roulette.html')">🎡 Рулетка</button>
-        <button onclick="Telegram.WebApp.openLink('https://yuriymuhlikkk.github.io/casino-mini-app/blackjack.html')">🃏 Блекджек</button>
-        <button onclick="Telegram.WebApp.openLink('https://yuriymuhlikkk.github.io/casino-mini-app/dice.html')">🎲 Кости</button>
-        <button onclick="deposit()">💸 Пополнить</button>
-        <button onclick="toggleTheme()">🌙 Тема</button>
+        <button onclick="openGame('slots.html')">🎰 Слоты</button>
+        <button onclick="openGame('roulette.html')">🎡 Рулетка</button>
+        <button onclick="openGame('blackjack.html')">🃏 Блекджек</button>
+        <button onclick="openGame('dice.html')">🎲 Кости</button>
+    </div>
+    <div class="deposit-options" id="depositOptions">
+        <button onclick="deposit('crypto')">Криптовалюта</button>
+        <button onclick="deposit('card')">Карта</button>
     </div>
 
     <script>
         let balance = 100;
+        let lang = "ru";
         let theme = "dark";
 
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
 
         function updateBalance() {
-            document.getElementById("balance").textContent = `Баланс: ${balance}`;
+            document.getElementById("balance").textContent = lang === "ru" ? `Баланс: ${balance}` : `Balance: ${balance}`;
         }
 
         function toggleTheme() {
@@ -87,8 +164,23 @@
             document.body.style.color = theme === "dark" ? "#e0e1dd" : "#0d1b2a";
         }
 
-        function deposit() {
-            alert("Пополнение через крипту скоро будет!");
+        function changeLang() {
+            lang = lang === "ru" ? "en" : "ru";
+            updateBalance();
+        }
+
+        function openGame(game) {
+            Telegram.WebApp.openLink(`https://yuriymuhlikkk.github.io/casino-mini-app/${game}`);
+        }
+
+        function toggleDeposit() {
+            const options = document.getElementById("depositOptions");
+            options.style.display = options.style.display === "block" ? "none" : "block";
+        }
+
+        function deposit(method) {
+            alert(lang === "ru" ? `Пополнение через ${method} скоро будет!` : `Deposit via ${method} coming soon!`);
+            document.getElementById("depositOptions").style.display = "none";
         }
 
         updateBalance();

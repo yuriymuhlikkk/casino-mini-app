@@ -23,14 +23,57 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('https://i.imgur.com/5z5xK8P.png') repeat;
-            opacity: 0.1;
-            animation: drift 20s linear infinite;
+            background: radial-gradient(circle, rgba(255, 69, 0, 0.1), transparent);
+            animation: pulse 10s infinite;
         }
-        @keyframes drift {
-            0% { background-position: 0 0; }
-            100% { background-position: 200px 200px; }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.2; }
+            100% { transform: scale(1); opacity: 0.5; }
         }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .balance-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .balance-box button {
+            background: #ff4500;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .balance-box button:hover { transform: scale(1.1); }
+        .options {
+            display: flex;
+            gap: 10px;
+        }
+        .options button {
+            background: linear-gradient(135deg, #ff4500, #ff8c00);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .options button:hover { transform: translateY(-3px); }
+        h1 { font-size: 36px; text-shadow: 0 0 10px #ff4500; }
         .dice-area {
             perspective: 1000px;
             margin: 20px 0;
@@ -69,12 +112,45 @@
             transition: transform 0.3s ease;
         }
         button:hover { transform: translateY(-5px); }
-        #balance { font-size: 24px; }
+        .deposit-options {
+            display: none;
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .deposit-options button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            background: linear-gradient(135deg, #ff4500, #ff8c00);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .deposit-options button:hover { transform: translateY(-3px); }
     </style>
 </head>
 <body class="bg-elements">
+    <div class="header">
+        <div class="balance-box">
+            <span id="balance">Баланс: 100</span>
+            <button onclick="toggleDeposit()">+</button>
+        </div>
+        <div class="options">
+            <button onclick="changeLang()">RU/EN</button>
+            <button onclick="toggleTheme()">🌙</button>
+        </div>
+    </div>
     <h1>🎲 Кости</h1>
-    <div id="balance">Баланс: 100</div>
     <div class="dice-area">
         <div class="die" id="die1">1</div>
         <div class="die" id="die2">2</div>
@@ -82,21 +158,48 @@
     <input type="number" id="bet" value="10" min="1" max="100" style="padding: 10px; margin: 10px; border-radius: 5px;">
     <button onclick="rollDice()">Бросить</button>
     <button onclick="Telegram.WebApp.close()">Назад</button>
+    <div class="deposit-options" id="depositOptions">
+        <button onclick="deposit('crypto')">Криптовалюта</button>
+        <button onclick="deposit('card')">Карта</button>
+    </div>
 
     <script>
         let balance = 100;
+        let lang = "ru";
+        let theme = "dark";
 
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
 
         function updateBalance() {
-            document.getElementById("balance").textContent = `Баланс: ${balance}`;
+            document.getElementById("balance").textContent = lang === "ru" ? `Баланс: ${balance}` : `Balance: ${balance}`;
+        }
+
+        function toggleTheme() {
+            theme = theme === "dark" ? "light" : "dark";
+            document.body.style.background = theme === "dark" ? "#0d1b2a" : "#e0e1dd";
+            document.body.style.color = theme === "dark" ? "#e0e1dd" : "#0d1b2a";
+        }
+
+        function changeLang() {
+            lang = lang === "ru" ? "en" : "ru";
+            updateBalance();
+        }
+
+        function toggleDeposit() {
+            const options = document.getElementById("depositOptions");
+            options.style.display = options.style.display === "block" ? "none" : "block";
+        }
+
+        function deposit(method) {
+            alert(lang === "ru" ? `Пополнение через ${method} скоро будет!` : `Deposit via ${method} coming soon!`);
+            document.getElementById("depositOptions").style.display = "none";
         }
 
         function rollDice() {
             const bet = parseInt(document.getElementById("bet").value);
             if (bet > balance) {
-                alert("Недостаточно средств!");
+                alert(lang === "ru" ? "Недостаточно средств!" : "Insufficient funds!");
                 return;
             }
 
@@ -115,14 +218,16 @@
                 const total = result[0] + result[1];
                 if (total === 7 || total === 11) {
                     balance += bet;
-                    alert(`Выпало ${total}! Вы выиграли ${bet}!`);
+                    alert(lang === "ru" ? `Выпало ${total}! Вы выиграли ${bet}!` : `Rolled ${total}! You won ${bet}!`);
                 } else {
                     balance -= bet;
-                    alert(`Выпало ${total}! Проигрыш!`);
+                    alert(lang === "ru" ? `Выпало ${total}! Проигрыш!` : `Rolled ${total}! Loss!`);
                 }
                 updateBalance();
             }, 1500);
         }
+
+        updateBalance();
     </script>
 </body>
 </html>
